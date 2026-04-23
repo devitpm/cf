@@ -1,0 +1,194 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<html lang="id">
+	<head>
+		<BaseHead title={`Keranjang - ${SITE_TITLE}`} description="Cek keranjang belanja dan checkout via WhatsApp." />
+	</head>
+	<body class="bg-[#960402] text-white">
+		<Header />
+		<main class="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
+			<div class="mb-10 max-w-3xl">
+				<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Keranjang</p>
+				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Ringkasan Pesanan</h1>
+				<p class="mt-4 text-base text-[#ffe7e1]">Atur jumlah produk lalu lanjut checkout via WhatsApp.</p>
+			</div>
+
+			<section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+				<div class="rounded-3xl border border-[#bf2f20] bg-[#7f0907] p-5 sm:p-6">
+					<div data-cart-empty class="rounded-2xl border border-dashed border-[#bf2f20] bg-[#8f1410] p-6 text-center text-[#ffd8cf]">
+						Keranjang masih kosong. Tambahkan produk dulu dari halaman produk.
+					</div>
+					<div class="space-y-4" data-cart-items></div>
+				</div>
+
+				<aside class="h-fit rounded-3xl border border-[#bf2f20] bg-[#7f0907] p-5 sm:p-6">
+					<h2 class="text-xl font-extrabold uppercase text-[#fff1ee]">Total Belanja</h2>
+					<div class="mt-5 space-y-3 text-sm text-[#ffd5ce]">
+						<div class="flex items-center justify-between gap-4">
+							<span>Total item</span>
+							<strong class="text-base text-[#fff1ee]" data-summary-qty>0</strong>
+						</div>
+						<div class="flex items-center justify-between gap-4 border-t border-[#b12314] pt-3">
+							<span>Subtotal</span>
+							<strong class="text-lg text-[#fff1ee]" data-summary-subtotal>Rp0</strong>
+						</div>
+					</div>
+
+					<a
+						href="https://wa.me/628991245050"
+						target="_blank"
+						rel="noopener noreferrer"
+						data-checkout-wa
+						class="mt-6 inline-flex w-full items-center justify-center rounded-xl border border-[#bf2f20] bg-[#25D366] px-4 py-3 text-sm font-bold uppercase text-[#052c13] transition hover:brightness-95"
+					>
+						Checkout via WhatsApp
+					</a>
+					<button type="button" data-clear-cart class="mt-3 inline-flex w-full items-center justify-center rounded-xl border border-[#bf2f20] bg-[#8f1410] px-4 py-3 text-sm font-semibold text-[#fff1ee] transition hover:bg-[#a71913]">
+						Kosongkan keranjang
+					</button>
+				</aside>
+			</section>
+		</main>
+		<Footer />
+
+		<script is:inline>
+			(() => {
+				function getNodes() {
+					return {
+						container: document.querySelector('[data-cart-items]'),
+						emptyState: document.querySelector('[data-cart-empty]'),
+						qtyNode: document.querySelector('[data-summary-qty]'),
+						subtotalNode: document.querySelector('[data-summary-subtotal]'),
+						checkoutLink: document.querySelector('[data-checkout-wa]'),
+					};
+				}
+
+				function cartApi() {
+					return window.CFCart;
+				}
+
+				function createItemNode(item, formatter) {
+					const wrapper = document.createElement('article');
+					wrapper.className = 'rounded-2xl border border-[#bf2f20] bg-[#8f1410] p-4';
+
+					wrapper.innerHTML = `
+						<div class="flex gap-3">
+							<img src="${item.image}" alt="${item.name}" class="h-20 w-20 rounded-xl object-cover border border-[#bf2f20]" />
+							<div class="min-w-0 flex-1">
+								<p class="truncate text-base font-bold text-[#fff1ee]">${item.name}</p>
+								<p class="mt-1 text-sm text-[#ffd5ce]">${formatter(item.price)} / item</p>
+								<div class="mt-3 flex flex-wrap items-center gap-2">
+									<button type="button" data-action="decrease" data-slug="${item.slug}" class="h-8 w-8 rounded-lg border border-[#bf2f20] bg-[#7f0907] font-bold text-white">-</button>
+									<input data-action="qty-input" data-slug="${item.slug}" type="number" min="1" value="${item.qty}" class="w-16 rounded-lg border border-[#bf2f20] bg-[#7f0907] px-2 py-1 text-center text-sm text-white" />
+									<button type="button" data-action="increase" data-slug="${item.slug}" class="h-8 w-8 rounded-lg border border-[#bf2f20] bg-[#7f0907] font-bold text-white">+</button>
+									<button type="button" data-action="remove" data-slug="${item.slug}" class="ml-auto rounded-lg border border-[#bf2f20] bg-[#a71913] px-3 py-1 text-xs font-semibold uppercase text-white">Hapus</button>
+								</div>
+							</div>
+						</div>
+					`;
+
+					return wrapper;
+				}
+
+				function render() {
+					const api = cartApi();
+					const { container, emptyState, qtyNode, subtotalNode, checkoutLink } = getNodes();
+
+					if (!api || !container || !emptyState || !qtyNode || !subtotalNode || !checkoutLink) {
+						return;
+					}
+
+					const items = api.getCart();
+					const totals = api.getTotals(items);
+
+					container.innerHTML = '';
+					emptyState.style.display = items.length ? 'none' : 'block';
+
+					items.forEach((item) => {
+						container.appendChild(createItemNode(item, api.formatCurrency));
+					});
+
+					qtyNode.textContent = String(totals.quantity);
+					subtotalNode.textContent = api.formatCurrency(totals.subtotal);
+					checkoutLink.href = api.buildWhatsappUrl('628991245050');
+					api.refreshSummary?.();
+				}
+
+				if (!window.__cfCartPageBound) {
+					window.__cfCartPageBound = true;
+
+					document.addEventListener('click', (event) => {
+						const clearTrigger = event.target.closest('[data-clear-cart]');
+						if (clearTrigger) {
+							event.preventDefault();
+							const api = cartApi();
+							if (api) {
+								api.clearCart();
+							}
+							return;
+						}
+
+						const target = event.target.closest('[data-action]');
+						if (!target) {
+							return;
+						}
+
+						const api = cartApi();
+						if (!api) {
+							return;
+						}
+
+						const slug = target.dataset.slug;
+						if (!slug) {
+							return;
+						}
+
+						const items = api.getCart();
+						const active = items.find((item) => item.slug === slug);
+						if (!active) {
+							return;
+						}
+
+						switch (target.dataset.action) {
+							case 'increase':
+								api.setQty(slug, active.qty + 1);
+								break;
+							case 'decrease':
+								api.setQty(slug, Math.max(1, active.qty - 1));
+								break;
+							case 'remove':
+								api.removeItem(slug);
+								break;
+							default:
+								break;
+						}
+					});
+
+					document.addEventListener('change', (event) => {
+						const input = event.target.closest('[data-action="qty-input"]');
+						if (!input) {
+							return;
+						}
+
+						const api = cartApi();
+						if (!api || !input.dataset.slug) {
+							return;
+						}
+
+						api.setQty(input.dataset.slug, Number(input.value));
+					});
+				}
+
+				window.addEventListener('cf-cart-updated', render);
+				document.addEventListener('astro:page-load', render);
+				document.addEventListener('astro:after-swap', render);
+				render();
+			})();
+		</script>
+	</body>
+</html>

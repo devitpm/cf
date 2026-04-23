@@ -1,50 +1,115 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import FormattedDate from '../components/FormattedDate.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const [products, brands, categories, recipes, blogPosts] = await Promise.all([
+	getCollection('products'),
+	getCollection('brands'),
+	getCollection('categories'),
+	getCollection('recipes'),
+	getCollection('blog'),
+]);
+
+const featuredProducts = products.slice(0, 4);
+const latestPosts = [...blogPosts].sort((a, b) => b.data.releaseDate.valueOf() - a.data.releaseDate.valueOf()).slice(0, 3);
+
+const brandMap = new Map(brands.map((brand) => [brand.data.slug, brand.data]));
+
+const currency = new Intl.NumberFormat('id-ID', {
+	style: 'currency',
+	currency: 'IDR',
+	maximumFractionDigits: 0,
+});
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="id">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
-	<body>
-		<Header />
+	<body class="bg-[#960402] text-white">
+		<Header/>
+
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<section class="hero-bg-pattern overflow-hidden border-t border-[#b12314]">
+				<div class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-6 lg:px-8 lg:py-20">
+					<div class="max-w-xl">
+						<h1 class="text-5xl font-black uppercase tracking-tight">Cahaya Foodies</h1>
+						<h2 class="mt-4 text-2xl font-black uppercase font-semibold">Pusat Distributor Frozen Food Berkualitas</h2>
+						<p class="mt-5 text-base leading-8 text-[#ffe7e1] sm:text-lg">Berbagai produk olahan daging ayam, sapi, nugget, sosis, dan saos dari brand terpercaya. Kualitas premium untuk kebutuhan bisnis dan rumah tangga Anda.</p>
+
+						<div class="mt-8 flex flex-wrap gap-2">
+							<span class="rounded-full bg-[#be4f49] px-7 py-3 text-base font-semibold">✓ Produk Berkualitas</span>
+							<span class="rounded-full bg-[#be4f49] px-7 py-3 text-base font-semibold">✓ Halal 100%</span>
+							<span class="rounded-full bg-[#be4f49] px-7 py-3 text-base font-semibold">✓ Harga Distributor</span>
+						</div>
+					</div>
+
+					<div class="relative">
+						<img src="/mobil-cf.png" alt="Armada distribusi Cahayafoodies" class="mx-auto w-full max-w-[690px] object-contain" />
+					</div>
+				</div>
+			</section>
+
+			<section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+				<div class="mb-8 flex items-end justify-between gap-4">
+					<div>
+						<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Produk</p>
+						<h3 class="mt-2 text-3xl font-black uppercase">Pilihan Utama</h3>
+					</div>
+					<a href="/products" class="text-sm font-semibold text-[#ffd8cf] hover:text-white">Lihat semua</a>
+				</div>
+
+				<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+					{featuredProducts.map((product) => {
+						const brand = brandMap.get(product.data.brand);
+						const discounted = typeof product.data.discountPrice === 'number' && product.data.discountPrice < product.data.price;
+
+						return (
+							<a href={`/products/${product.data.slug}/`} class="group overflow-hidden rounded-3xl border border-[#bf2f20] bg-[#7f0907] transition hover:-translate-y-1 hover:border-[#ff8368]">
+								<img src={product.data.mainImage} alt={product.data.name} class="h-48 w-full object-cover transition group-hover:scale-105" />
+								<div class="space-y-3 p-5">
+									<p class="text-xs font-bold uppercase tracking-[0.2em] text-[#ffb9ac]">{brand?.name ?? product.data.brand}</p>
+									<h4 class="text-2xl font-extrabold leading-tight">{product.data.name}</h4>
+									<p class="text-sm leading-6 text-[#ffd5ce]">{product.data.description}</p>
+									<div class="text-right">
+										{discounted && <p class="text-xs text-[#ffad9f] line-through">{currency.format(product.data.price)}</p>}
+										<p class="text-lg font-extrabold text-[#fff1ee]">{currency.format(discounted ? product.data.discountPrice : product.data.price)}</p>
+									</div>
+								</div>
+							</a>
+						);
+					})}
+				</div>
+			</section>
+
+			<section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+				<div class="mb-8 flex items-end justify-between gap-4">
+					<div>
+						<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Blog</p>
+						<h3 class="mt-2 text-3xl font-black uppercase">Update Terbaru</h3>
+					</div>
+					<a href="/blog" class="text-sm font-semibold text-[#ffd8cf] hover:text-white">Lihat semua</a>
+				</div>
+
+				<div class="grid gap-5 md:grid-cols-3">
+					{latestPosts.map((post) => (
+						<a href={`/blog/${post.data.slug}/`} class="flex gap-3 rounded-2xl border border-[#bf2f20] bg-[#7f0907] p-3 transition hover:border-[#ff8368]">
+							<img src={post.data.mainImage} alt={post.data.title} class="h-20 w-20 rounded-xl object-cover" />
+							<div>
+								<p class="text-xs uppercase tracking-[0.2em] text-[#ffbea7]"><FormattedDate date={post.data.releaseDate} /></p>
+								<h4 class="mt-2 text-base font-bold leading-tight">{post.data.title}</h4>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
 		</main>
+
 		<Footer />
 	</body>
 </html>

@@ -1,0 +1,64 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+	const categories = await getCollection('categories');
+	return categories.map((category) => ({
+		params: { slug: category.data.slug },
+		props: category,
+	}));
+}
+
+type Props = CollectionEntry<'categories'>;
+
+const category = Astro.props;
+const { Content } = await render(category);
+const products = (await getCollection('products')).filter((product) => product.data.category === category.data.slug);
+---
+
+<html lang="id">
+	<head>
+		<BaseHead title={`${category.data.name} - ${SITE_TITLE}`} description={category.data.name} image={category.data.image} />
+	</head>
+	<body class="bg-[#960402] text-white">
+		<Header />
+		<main class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+			<a href="/categories" class="text-sm font-semibold text-[#ffd8cf] hover:text-white">&larr; Kembali ke kategori</a>
+			<section class="mt-6 grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+				<div class="overflow-hidden rounded-3xl border border-[#bf2f20] bg-[#7f0907]">
+					<img src={category.data.image} alt={category.data.name} class="h-full w-full object-cover" />
+				</div>
+				<div class="space-y-6">
+					<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Kategori</p>
+					<h1 class="text-4xl font-black uppercase tracking-tight">{category.data.name}</h1>
+					<section class="prose prose-invert max-w-none prose-headings:text-[#fff1ee] prose-p:text-[#ffe7e1] prose-strong:text-white prose-a:text-[#ffd8cf]">
+						<Content />
+					</section>
+				</div>
+			</section>
+
+			<section class="mt-12">
+				<div class="mb-6 flex items-center justify-between gap-4">
+					<h2 class="text-2xl font-black uppercase">Produk dalam kategori ini</h2>
+					<p class="text-sm text-[#ffbea7]">{products.length} produk</p>
+				</div>
+				<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+					{products.map((product) => (
+						<a href={`/products/${product.data.slug}/`} class="group overflow-hidden rounded-3xl border border-[#bf2f20] bg-[#7f0907] transition hover:-translate-y-1 hover:border-[#ff8368]">
+							<img src={product.data.mainImage} alt={product.data.name} class="h-56 w-full object-cover" />
+							<div class="p-5">
+								<h3 class="text-xl font-extrabold text-[#fff1ee]">{product.data.name}</h3>
+								<p class="mt-2 text-sm text-[#ffd5ce]">{product.data.description}</p>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

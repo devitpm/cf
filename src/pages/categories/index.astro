@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const categories = await getCollection('categories');
+---
+
+<html lang="id">
+	<head>
+		<BaseHead title={`Kategori - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+	</head>
+	<body class="bg-[#960402] text-white">
+		<Header />
+		<main class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+			<div class="mb-10 max-w-3xl">
+				<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Kategori</p>
+				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Pengelompokan produk dan konten</h1>
+			</div>
+
+			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{categories.map((category) => (
+					<a href={`/categories/${category.data.slug}/`} class="group overflow-hidden rounded-3xl border border-[#bf2f20] bg-[#7f0907] transition hover:-translate-y-1 hover:border-[#ff8368]">
+						<img src={category.data.image} alt={category.data.name} class="h-56 w-full object-cover" />
+						<div class="p-5">
+							<p class="text-xs font-bold uppercase tracking-[0.25em] text-[#ffb9ac]">Kategori</p>
+							<h2 class="mt-2 text-2xl font-extrabold text-[#fff1ee]">{category.data.name}</h2>
+							<p class="mt-3 text-sm leading-6 text-[#ffd5ce]">{category.body}</p>
+						</div>
+					</a>
+				))}
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
