@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../../components/BaseHead.astro';
+import Footer from '../../../components/Footer.astro';
+import Header from '../../../components/Header.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { BLOG_POSTS_PER_PAGE, SITE_DESCRIPTION, SITE_TITLE } from '../../../consts';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog')).sort((a, b) => b.data.releaseDate.valueOf() - a.data.releaseDate.valueOf());
+  const totalPages = Math.ceil(posts.length / BLOG_POSTS_PER_PAGE);
+
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, idx) => {
+    const page = idx + 2;
+    const start = (page - 1) * BLOG_POSTS_PER_PAGE;
+    const end = start + BLOG_POSTS_PER_PAGE;
+
+    return {
+      params: { page: String(page) },
+      props: {
+        posts: posts.slice(start, end),
+        currentPage: page,
+        totalPages,
+      },
+    };
+  });
+}
+
+const { posts, currentPage, totalPages } = Astro.props;
+---
+
+<html lang="id">
+  <head>
+    <BaseHead title={`Blog - Halaman ${currentPage} - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+  </head>
+  <body class="bg-[#960402] text-white">
+    <Header />
+    <main class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <div class="mb-10 max-w-3xl">
+        <p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Blog</p>
+        <h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Artikel Cahaya Foodies</h1>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {posts.map((post) => (
+          <a href={`/blog/${post.data.slug}/`} class="group overflow-hidden rounded-3xl border border-[#bf2f20] bg-[#7f0907] transition hover:-translate-y-1 hover:border-[#ff8368]">
+            <img src={post.data.mainImage} alt={post.data.title} class="h-56 w-full object-cover transition group-hover:scale-105" />
+            <div class="p-5">
+              <p class="text-xs font-bold uppercase tracking-[0.25em] text-[#ffb9ac]"><FormattedDate date={post.data.releaseDate} /></p>
+              <h2 class="mt-2 text-2xl font-extrabold text-[#fff1ee]">{post.data.title}</h2>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/blog" />
+    </main>
+    <Footer />
+  </body>
+</html>

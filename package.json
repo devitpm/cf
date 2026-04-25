@@ -35,6 +35,7 @@
 		"check": "astro build && tsc && wrangler deploy --dry-run",
 		"deploy": "wrangler deploy",
 		"dev": "astro dev",
+		"fetch-posts": "node scripts/fetch-wordpress-posts.mjs",
 		"preview": "astro build && wrangler dev"
 	},
 	"type": "module"

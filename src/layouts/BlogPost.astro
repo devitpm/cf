@@ -35,7 +35,7 @@ const { title, description = title, releaseDate, mainImage } = Astro.props as Pr
 						</p>
 						<h1 class="mt-3 text-4xl font-black uppercase leading-tight text-[#fff1ee] sm:text-5xl">{title}</h1>
 					</div>
-					<section class="prose prose-invert max-w-none prose-headings:text-[#fff1ee] prose-p:text-[#ffe7e1] prose-strong:text-white prose-a:text-[#ffd8cf]">
+					<section class="blog-content max-w-none text-[#ffe7e1]">
 						<slot />
 					</section>
 				</div>
@@ -44,3 +44,104 @@ const { title, description = title, releaseDate, mainImage } = Astro.props as Pr
 		<Footer />
 	</body>
 </html>
+
+	<style>
+		.blog-content :global(p) {
+			margin: 0 0 1rem;
+			line-height: 1.85;
+		}
+
+		.blog-content :global(h2),
+		.blog-content :global(h3),
+		.blog-content :global(h4),
+		.blog-content :global(h5),
+		.blog-content :global(h6) {
+			margin: 2rem 0 1rem;
+			font-weight: 900;
+			line-height: 1.2;
+			color: #fff1ee;
+		}
+
+		.blog-content :global(h2) {
+			font-size: 1.875rem;
+		}
+
+		.blog-content :global(h3) {
+			font-size: 1.5rem;
+		}
+
+		.blog-content :global(h4) {
+			font-size: 1.25rem;
+		}
+
+		.blog-content :global(ul),
+		.blog-content :global(ol) {
+			margin: 1rem 0 1.25rem;
+			padding-left: 1.5rem;
+		}
+
+		.blog-content :global(ul) {
+			list-style: disc;
+		}
+
+		.blog-content :global(ol) {
+			list-style: decimal;
+		}
+
+		.blog-content :global(li) {
+			margin: 0.5rem 0;
+			line-height: 1.8;
+		}
+
+		.blog-content :global(strong) {
+			font-weight: 800;
+			color: #fff7f4;
+		}
+
+		.blog-content :global(a) {
+			color: #ffd8cf;
+			text-decoration: underline;
+			text-underline-offset: 0.15em;
+		}
+
+		.blog-content :global(blockquote) {
+			margin: 1.5rem 0;
+			padding: 1rem 1.25rem;
+			border-left: 4px solid #ff8368;
+			background: rgba(0, 0, 0, 0.12);
+			border-radius: 1rem;
+		}
+
+		.blog-content :global(figure) {
+			margin: 1.5rem 0;
+		}
+
+		.blog-content :global(img) {
+			max-width: 100%;
+			height: auto;
+			border-radius: 1.5rem;
+		}
+
+		.blog-content :global(hr) {
+			margin: 2rem 0;
+			border-color: rgba(255, 255, 255, 0.18);
+		}
+
+		.blog-content :global(table) {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 1.5rem 0;
+		}
+
+		.blog-content :global(th),
+		.blog-content :global(td) {
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			padding: 0.75rem 1rem;
+			text-align: left;
+		}
+
+		.blog-content :global(th) {
+			color: #fff1ee;
+			background: rgba(0, 0, 0, 0.12);
+		}
+	</style>

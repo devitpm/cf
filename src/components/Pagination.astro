@@ -1,0 +1,84 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath: string;
+}
+
+const { currentPage, totalPages, basePath } = Astro.props as Props;
+
+if (totalPages <= 1) {
+  return null;
+}
+
+const pageHref = (page: number) => {
+  if (page <= 1) {
+    return `${basePath}/`;
+  }
+  return `${basePath}/page/${page}/`;
+};
+
+const windowSize = 2;
+const startPage = Math.max(1, currentPage - windowSize);
+const endPage = Math.min(totalPages, currentPage + windowSize);
+const visiblePages = Array.from({ length: endPage - startPage + 1 }, (_, idx) => startPage + idx);
+---
+
+<nav class="mt-10 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
+  <a
+    href={pageHref(Math.max(1, currentPage - 1))}
+    class:list={[
+      'rounded-xl border px-4 py-2 text-sm font-semibold transition',
+      currentPage === 1
+        ? 'pointer-events-none border-[#7a1c10] bg-[#6a110e] text-[#d79a90]'
+        : 'border-[#bf2f20] bg-[#8f1410] text-[#fff1ee] hover:border-[#ff8368] hover:bg-[#a71913]',
+    ]}
+    aria-disabled={currentPage === 1}
+  >
+    Sebelumnya
+  </a>
+
+  {startPage > 1 && (
+    <>
+      <a href={pageHref(1)} class="rounded-xl border border-[#bf2f20] bg-[#8f1410] px-4 py-2 text-sm font-semibold text-[#fff1ee] transition hover:border-[#ff8368] hover:bg-[#a71913]">1</a>
+      {startPage > 2 && <span class="px-2 text-[#ffb9ac]">...</span>}
+    </>
+  )}
+
+  {visiblePages.map((pageNumber) => (
+    <a
+      href={pageHref(pageNumber)}
+      aria-current={pageNumber === currentPage ? 'page' : undefined}
+      class:list={[
+        'rounded-xl border px-4 py-2 text-sm font-semibold transition',
+        pageNumber === currentPage
+          ? 'border-[#ff8368] bg-[#f03b0f] text-white'
+          : 'border-[#bf2f20] bg-[#8f1410] text-[#fff1ee] hover:border-[#ff8368] hover:bg-[#a71913]',
+      ]}
+    >
+      {pageNumber}
+    </a>
+  ))}
+
+  {endPage < totalPages && (
+    <>
+      {endPage < totalPages - 1 && <span class="px-2 text-[#ffb9ac]">...</span>}
+      <a href={pageHref(totalPages)} class="rounded-xl border border-[#bf2f20] bg-[#8f1410] px-4 py-2 text-sm font-semibold text-[#fff1ee] transition hover:border-[#ff8368] hover:bg-[#a71913]">
+        {totalPages}
+      </a>
+    </>
+  )}
+
+  <a
+    href={pageHref(Math.min(totalPages, currentPage + 1))}
+    class:list={[
+      'rounded-xl border px-4 py-2 text-sm font-semibold transition',
+      currentPage === totalPages
+        ? 'pointer-events-none border-[#7a1c10] bg-[#6a110e] text-[#d79a90]'
+        : 'border-[#bf2f20] bg-[#8f1410] text-[#fff1ee] hover:border-[#ff8368] hover:bg-[#a71913]',
+    ]}
+    aria-disabled={currentPage === totalPages}
+  >
+    Berikutnya
+  </a>
+</nav>

@@ -3,11 +3,15 @@ import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
+import Pagination from '../../components/Pagination.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const products = await getCollection('products');
 const brands = await getCollection('brands');
 const categories = await getCollection('categories');
+const PRODUCTS_PER_PAGE = 8;
+const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+const paginatedProducts = products.slice(0, PRODUCTS_PER_PAGE);
 
 const brandMap = new Map(brands.map((brand) => [brand.data.slug, brand.data]));
 const categoryMap = new Map(categories.map((category) => [category.data.slug, category.data]));
@@ -28,12 +32,11 @@ const currency = new Intl.NumberFormat('id-ID', {
 		<main class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
 			<div class="mb-10 max-w-3xl">
 				<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Produk</p>
-				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Katalog produk statis</h1>
-				<p class="mt-4 text-base text-[#ffe7e1]">Semua produk diambil dari content collection agar mudah dikelola sebagai katalog statis.</p>
+				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Katalog cahaya foodies</h1>
 			</div>
 
 			<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-				{products.map((product) => {
+				{paginatedProducts.map((product) => {
 					const brand = brandMap.get(product.data.brand);
 					const category = categoryMap.get(product.data.category);
 					const discounted = typeof product.data.discountPrice === 'number' && product.data.discountPrice < product.data.price;
@@ -78,6 +81,8 @@ const currency = new Intl.NumberFormat('id-ID', {
 					);
 				})}
 			</div>
+
+			<Pagination currentPage={1} totalPages={totalPages} basePath="/products" />
 		</main>
 		<Footer />
 	</body>

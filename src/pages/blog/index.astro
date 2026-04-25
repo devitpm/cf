@@ -4,9 +4,12 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import Pagination from '../../components/Pagination.astro';
+import { BLOG_POSTS_PER_PAGE, SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const posts = (await getCollection('blog')).sort((a, b) => b.data.releaseDate.valueOf() - a.data.releaseDate.valueOf());
+const totalPages = Math.ceil(posts.length / BLOG_POSTS_PER_PAGE);
+const paginatedPosts = posts.slice(0, BLOG_POSTS_PER_PAGE);
 ---
 
 <html lang="id">
@@ -18,12 +21,11 @@ const posts = (await getCollection('blog')).sort((a, b) => b.data.releaseDate.va
 		<main class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
 			<div class="mb-10 max-w-3xl">
 				<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Blog</p>
-				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Artikel dan update brand</h1>
-				<p class="mt-4 text-base text-[#ffe7e1]">Blog tetap berbasis markdown, tetapi sekarang memakai field slug dan tanggal rilis yang konsisten dengan struktur e-commerce statis.</p>
+				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Artikel Cahaya Foodies</h1>
 			</div>
 
 			<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-				{posts.map((post) => (
+				{paginatedPosts.map((post) => (
 					<a href={`/blog/${post.data.slug}/`} class="group overflow-hidden rounded-3xl border border-[#bf2f20] bg-[#7f0907] transition hover:-translate-y-1 hover:border-[#ff8368]">
 						<img src={post.data.mainImage} alt={post.data.title} class="h-56 w-full object-cover transition group-hover:scale-105" />
 						<div class="p-5">
@@ -33,6 +35,8 @@ const posts = (await getCollection('blog')).sort((a, b) => b.data.releaseDate.va
 					</a>
 				))}
 			</div>
+
+			<Pagination currentPage={1} totalPages={totalPages} basePath="/blog" />
 		</main>
 		<Footer />
 	</body>

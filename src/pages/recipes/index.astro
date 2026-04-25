@@ -4,9 +4,13 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
+import Pagination from '../../components/Pagination.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const recipes = (await getCollection('recipes')).sort((a, b) => b.data.releaseDate.valueOf() - a.data.releaseDate.valueOf());
+const RECIPES_PER_PAGE = 9;
+const totalPages = Math.ceil(recipes.length / RECIPES_PER_PAGE);
+const paginatedRecipes = recipes.slice(0, RECIPES_PER_PAGE);
 ---
 
 <html lang="id">
@@ -18,11 +22,11 @@ const recipes = (await getCollection('recipes')).sort((a, b) => b.data.releaseDa
 		<main class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
 			<div class="mb-10 max-w-3xl">
 				<p class="text-xs font-bold uppercase tracking-[0.3em] text-[#ffbeb2]">Resep</p>
-				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Konten resep untuk mendukung katalog</h1>
+				<h1 class="mt-3 text-4xl font-black uppercase tracking-tight sm:text-5xl">Aneka Resep</h1>
 			</div>
 
 			<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-				{recipes.map((recipe) => (
+				{paginatedRecipes.map((recipe) => (
 					<a href={`/recipes/${recipe.data.slug}/`} class="group overflow-hidden rounded-3xl border border-[#bf2f20] bg-[#7f0907] transition hover:-translate-y-1 hover:border-[#ff8368]">
 						<img src={recipe.data.mainImage} alt={recipe.data.title} class="h-56 w-full object-cover" />
 						<div class="p-5">
@@ -32,6 +36,8 @@ const recipes = (await getCollection('recipes')).sort((a, b) => b.data.releaseDa
 					</a>
 				))}
 			</div>
+
+			<Pagination currentPage={1} totalPages={totalPages} basePath="/recipes" />
 		</main>
 		<Footer />
 	</body>
