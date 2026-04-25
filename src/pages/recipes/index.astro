@@ -5,10 +5,9 @@ import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Pagination from '../../components/Pagination.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { RECIPES_PER_PAGE, SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const recipes = (await getCollection('recipes')).sort((a, b) => b.data.releaseDate.valueOf() - a.data.releaseDate.valueOf());
-const RECIPES_PER_PAGE = 9;
 const totalPages = Math.ceil(recipes.length / RECIPES_PER_PAGE);
 const paginatedRecipes = recipes.slice(0, RECIPES_PER_PAGE);
 ---
